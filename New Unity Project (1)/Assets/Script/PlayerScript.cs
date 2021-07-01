@@ -6,20 +6,24 @@ using System.IO;
 
 public class PlayerScript : MonoBehaviour
 {
-    bool runcon = true;
+
     // bool controller; 
     public float kick = 0.1f;
     private Transform BallWayPoint;
-
+     public GameObject controller;
     private Transform playerT;
     private Transform playerS;
-    private NavMeshAgent agent;
-    private Animator anim;
+    public NavMeshAgent agent;
+    public Animator anim;
     public int repetition;
     public int time;
-    bool controller;
     public int currentTg;
     public int currentPs;
+    public Vector3 playerstarted;
+
+    public bool animIsOff;
+
+    public bool isKick;
 
     // Start is called before the first frame update
 
@@ -27,20 +31,17 @@ public class PlayerScript : MonoBehaviour
     void Start()
     {
         playerT= GetComponent<Transform>();
-        playerS = playerT;
+        playerstarted = playerT.position;
+        Debug.Log("posiçao de start = " + playerstarted);
         anim = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         BallWayPoint = GameObject.FindWithTag("BallWayPoint").transform;
         //controller = true;
         kick = 1f;
-        StreamReader sr = new StreamReader("controller.txt");
-        string[] file = sr.ReadLine().Split(' ');
-        int.TryParse(file[0], out repetition);
-        int.TryParse(file[1], out time);
-        targets = new int[2 * repetition];
-        Directions();
         currentPs = 0;
-        controller = true;
+        //controller = true;
+        isKick= false;
+        animIsOff = false;
 
     }
 
@@ -59,52 +60,47 @@ public class PlayerScript : MonoBehaviour
             anim.SetBool("idle", true);
 
         }
-        if (controller)
-        {
-            //controller = false;
-            if (currentPs < targets.Length)
-            {
-                currentTg = targets[currentPs];
 
-                if ((currentTg == 1 && Input.GetMouseButtonDown(1)) || (currentTg == 0 && Input.GetMouseButtonDown(0)))
-                {
-                    //anim.SetBool("idle",false);
-                    anim.SetBool("run", true);
-                    agent.destination = BallWayPoint.position;
-
-                }
-            }
-            else
-            {
-                 Debug.Log("fim de jogo");        
-            }
+        if (controller.GetComponent<Controller>().getReturnP()){
+            updateStatus();
         }
+
+        // if (controller)
+        // {
+        //     //controller = false;
+        //     if (1==1)//(currentPs < targets.Length)
+        //     {
+        //         currentTg = 1;//targets[currentPs];
+
+        //         if ((currentTg == 1 && Input.GetMouseButtonDown(1)) || (currentTg == 0 && Input.GetMouseButtonDown(0)))
+        //         {
+        //             //anim.SetBool("idle",false);
+        //             anim.SetBool("run", true);
+        //             agent.destination = BallWayPoint.position;
+
+        //         }
+        //     }
+        //     else
+        //     {
+        //          Debug.Log("fim de jogo");        
+        //     }
+        // }
 
     }
 
-    void Directions()
-    {
+    public void toBall(){
+        setIsKick(true);
+        agent.enabled = true;
+        anim.SetBool("idle",false);
+        anim.SetBool("run", true);
+        agent.destination = BallWayPoint.position;  
+    }
 
-        int i = 0;
-        while (i < targets.Length)
-        {
-            int c = Random.Range(0, 2);
-            if (c == 1)
-            {
-                targets[i] = c;
-                targets[i + 1] = c - 1;
-                i += 2;
-            }
-            else
-            {
-                targets[i] = c;
-                targets[i + 1] = c + 1;
-                i += 2;
-            }
-
-        }
-
-
+    public bool getIsKick(){
+        return isKick;
+    }
+    public void setIsKick(bool b){
+        isKick = b;
     }
 
     public int getCurrentPs()
@@ -112,16 +108,16 @@ public class PlayerScript : MonoBehaviour
         return currentPs;
     }
 
-    public void setController(bool C)
-    {
-        controller = C;
+    // public void setController(bool C)
+    // {
+    //     controller = C;
 
-    }
+    // }
 
-    public bool getController()
-    {
-        return controller;
-    }
+    // public bool getController()
+    // {
+    //     return controller;
+    // }
 
     public void setCurrentPs(int P)
     {
@@ -129,8 +125,22 @@ public class PlayerScript : MonoBehaviour
 
     }
 
-    public void setPositionStart(){
-        playerT = playerS;
+
+    public void updateStatus(){
+        anim.enabled = false;
+        animIsOff = true;
+        agent.ResetPath();
+        playerT.position = playerstarted;
+        if (animIsOff)
+            StartCoroutine( animOn());
+        controller.GetComponent<Controller>().setReturnP(false);
+        Debug.Log("posiçao des de setar o start = " + playerT.position);
+    }
+
+    IEnumerator animOn(){
+    yield return new WaitForSecondsRealtime(0.05f);
+        anim.enabled = true;
+        animIsOff = false;
     }
 
 }
