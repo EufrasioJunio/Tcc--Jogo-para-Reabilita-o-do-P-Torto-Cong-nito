@@ -32,7 +32,7 @@ public class PlayerScript : MonoBehaviour
     {
         playerT= GetComponent<Transform>();
         playerstarted = playerT.position;
-        Debug.Log("posiçao de start = " + playerstarted);
+        //Debug.Log("posiçao de start = " + playerstarted);
         anim = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         BallWayPoint = GameObject.FindWithTag("BallWayPoint").transform;
@@ -134,7 +134,7 @@ public class PlayerScript : MonoBehaviour
         if (animIsOff)
             StartCoroutine( animOn());
         controller.GetComponent<Controller>().setReturnP(false);
-        Debug.Log("posiçao des de setar o start = " + playerT.position);
+        //Debug.Log("posiçao des de setar o start = " + playerT.position);
     }
 
     IEnumerator animOn(){

@@ -25,7 +25,13 @@ public class Controller : MonoBehaviour
     public bool returnB;
 
     public bool returnP;
-    public bool acertou;
+
+    public int correctSide;
+
+    public int tError;
+
+
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -33,6 +39,7 @@ public class Controller : MonoBehaviour
         // string[] file = sr.ReadLine().Split(' ');
         // int.TryParse(file[0], out repetition);
         // int.TryParse(file[1], out time);
+        Application.targetFrameRate = 60;
         string jsonC = File.ReadAllText(Application.dataPath + "/config.json");
         string jsonL = File.ReadAllText(Application.dataPath + "/log.json");
         configData = JsonUtility.FromJson<ConfigData>(jsonC);
@@ -43,25 +50,44 @@ public class Controller : MonoBehaviour
         Directions();
         playng = true;
         currentPs = 0;
-        arrow.GetComponent<Arrow>().arrowDirection();
+        //arrow.GetComponent<Arrow>().setRightD(false);
+        // arrow.GetComponent<Arrow>().arrowDirection();
         returnB = false;
         returnP = false;
+        correctSide = 0;
+        tError = 0;
+        arrow.GetComponent<Arrow>().setArrowDirection();
     }
 
     // Update is called once per frame
     void Update()
     {
         if(currentPs < targets.Length){
+            bool right = (getCurrentTg() == 1);
             if(playng){
-                if ((getCurrentTg() == 1 && Input.GetMouseButtonDown(1)) || (getCurrentTg() == 0 && Input.GetMouseButtonDown(0))){
-                    playng = false;
-                    //acertou = true;
-                    player.GetComponent<PlayerScript>().toBall();
-                    StartCoroutine( restTime());
+                if (correctSide > time*60){
+                        correctSide = 0;
+                        playng = false;
+                        player.GetComponent<PlayerScript>().toBall();
+                        StartCoroutine( restTime());
+                      
+                }else{
+                    if ( (right && Input.GetAxis("Horizontal") > 0) || (!right && Input.GetAxis("Horizontal") < 0)){
+                        correctSide +=1;
+                        //Debug.Log("lado correto = " + correctSide);
+                    }else if ((!right && Input.GetAxis("Horizontal") > 0) || (right && Input.GetAxis("Horizontal") < 0)){
+                        if (!arrow.GetComponent<Arrow>().getReporting())
+                            arrowReport();
+                    }else if (correctSide >0 && Input.GetAxis("Horizontal") == 0){
+                        if (!arrow.GetComponent<Arrow>().getReporting())
+                            arrowReport();
                     }
+                }
+
                 
             }
         }else{
+            correctSide= 0;
             Debug.Log("Fim De Jogo");
 
         } 
@@ -69,7 +95,7 @@ public class Controller : MonoBehaviour
     }
 
     IEnumerator restTime(){
-        yield return new WaitForSecondsRealtime(time);
+        yield return new WaitForSecondsRealtime(2f);
         returnP = true;
         returnB = true;
         //player.GetComponent<PlayerScript>().updateStatus();
@@ -77,7 +103,7 @@ public class Controller : MonoBehaviour
         if((currentPs +1) < targets.Length){
             currentPs +=1;
             //Debug.Log( "posi atual = " + currentPs);
-            arrow.GetComponent<Arrow>().arrowDirection();
+            arrow.GetComponent<Arrow>().setArrowDirection();
         }else{
             currentPs +=1;
         }
@@ -134,6 +160,18 @@ public class Controller : MonoBehaviour
 
     public int getCurrentTg(){
         return targets[currentPs];
+    }
+
+    public void arrowReport(){
+        arrow.GetComponent<Arrow>().setColor();
+    }
+
+    public void setCorrectSide(int i){
+        correctSide = i;
+    }
+
+    public void addTError(){
+        tError += 1;
     }
 
     public class ConfigData {

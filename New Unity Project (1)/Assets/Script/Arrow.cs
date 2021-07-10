@@ -6,14 +6,23 @@ public class Arrow : MonoBehaviour
 {
     // Start is called before the first frame update
     public GameObject controller;
-    public bool rightD;
+    public bool arrowRight;
     private Transform arrow;
+
+    public Material material;
+
+    public Color correctColor;
+
+     public Color errortColor;
+
+     public bool reporting;
     void Start()
     {
-        gameObject.SetActive(gameObject.activeSelf);
+        //gameObject.SetActive(gameObject.activeSelf);
+        reporting = false;
+        material.color = correctColor;
         arrow = GetComponent<Transform>();
-        rightD = false;
-
+        //setArrowDirection();
     }
 
     // Update is called once per frame
@@ -22,17 +31,42 @@ public class Arrow : MonoBehaviour
 
     }
 
-    public void arrowDirection(){
 
-        if (controller.GetComponent<Controller>().getCurrentTg() == 1 && !rightD){
-            arrow.Rotate(0f,0f,180f);
-            rightD = true;
-            //gameObject.SetActive(gameObject.activeSelf);
-        }else if (controller.GetComponent<Controller>().getCurrentTg() == 0 && rightD){
-            arrow.Rotate(0f,0f,180f);
-            rightD = false;
-            //gameObject.SetActive(!gameObject.activeSelf);
+    public void setRotationRight() {
+        arrow.SetPositionAndRotation(arrow.position, new Quaternion(0f,0f,180f, 0f));
+    }
+    public void setRotationLeft() {
+        arrow.SetPositionAndRotation(arrow.position, new Quaternion(0f,0f,0f, 0f));
+    }
+    public void setArrowDirection(){
+        bool targetRight = (controller.GetComponent<Controller>().getCurrentTg() == 1);
+        if(targetRight){
+            setRotationRight();
+        }else if (!targetRight){
+            setRotationLeft();
         }
-        //Debug.Log( "target atual = " + controller.GetComponent<Controller>().getCurrentTg());
+    }
+
+    public bool getReporting(){
+        return reporting;
+    }
+    public void setReporting(bool b){
+        reporting = b;
+    }
+
+    public void setColor(){ 
+            reporting = true;
+            material.color = errortColor;
+            StartCoroutine(timeToReport());  
+
+
+    }
+
+    IEnumerator timeToReport(){
+            yield return new WaitForSecondsRealtime(1f);
+            controller.GetComponent<Controller>().addTError();
+            controller.GetComponent<Controller>().setCorrectSide(0);
+            material.color = correctColor;
+            reporting = false;
     }
 }
