@@ -4,15 +4,15 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.IO;
 
-public class Controller : MonoBehaviour
+public class Controller2 : MonoBehaviour
 {
-    
+
     public GameObject arrow;
     public GameObject player;
-
-    public GameObject ice ;
+    public GameObject ice;
     public int repetition;
     public int time;
+
     public int[] targets;
     public ConfigData configData;
 
@@ -57,7 +57,8 @@ public class Controller : MonoBehaviour
         returnP = false;
         correctSide = 0;
         tError = 0;
-        arrow.GetComponent<Arrow>().setArrowDirection();
+        arrow.GetComponent<Arrow2>().setArrowDirection();
+        ice.GetComponent<Ice>().setIcePosition();
     }
 
     // Update is called once per frame
@@ -69,7 +70,7 @@ public class Controller : MonoBehaviour
                 if (correctSide > time*60){
                         correctSide = 0;
                         playng = false;
-                        player.GetComponent<PlayerScript>().toBall();
+                        player.GetComponent<Bear>().toObjecty();
                         StartCoroutine( restTime());
                       
                 }else{
@@ -77,10 +78,10 @@ public class Controller : MonoBehaviour
                         correctSide +=1;
                         //Debug.Log("lado correto = " + correctSide);
                     }else if ((!right && Input.GetAxis("Horizontal") > 0) || (right && Input.GetAxis("Horizontal") < 0)){
-                        if (!arrow.GetComponent<Arrow>().getReporting())
+                        if (!arrow.GetComponent<Arrow2>().getReporting())
                             arrowReport();
                     }else if (correctSide >0 && Input.GetAxis("Horizontal") == 0){
-                        if (!arrow.GetComponent<Arrow>().getReporting())
+                        if (!arrow.GetComponent<Arrow2>().getReporting())
                             arrowReport();
                     }
                 }
@@ -104,7 +105,9 @@ public class Controller : MonoBehaviour
         if((currentPs +1) < targets.Length){
             currentPs +=1;
             //Debug.Log( "posi atual = " + currentPs);
-            arrow.GetComponent<Arrow>().setArrowDirection();
+            arrow.GetComponent<Arrow2>().setArrowDirection();
+            ice.GetComponent<Ice>().setIcePosition();
+
         }else{
             currentPs +=1;
         }
@@ -164,7 +167,7 @@ public class Controller : MonoBehaviour
     }
 
     public void arrowReport(){
-        arrow.GetComponent<Arrow>().setColor();
+        arrow.GetComponent<Arrow2>().setColor();
     }
 
     public void setCorrectSide(int i){
@@ -246,5 +249,4 @@ public class Controller : MonoBehaviour
 
 
     }
-}  
-
+}
